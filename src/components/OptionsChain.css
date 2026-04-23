@@ -1,0 +1,72 @@
+.options-chain.card {
+  border: 1px solid #1f2937;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #0b1220 0%, #111827 100%);
+  color: #f9fafb;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+
+.chain-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.chain-header h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.chain-header .meta {
+  display: flex;
+  gap: 12px;
+  font-size: 0.8rem;
+  color: #cbd5e1;
+}
+
+.options-chain .table-wrap {
+  overflow-x: auto;
+}
+
+.options-chain table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.options-chain th,
+.options-chain td {
+  text-align: right;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.options-chain thead th {
+  background: rgba(255, 255, 255, 0.03);
+  color: #93c5fd;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+}
+
+.options-chain td.strike,
+.options-chain th:nth-child(4) {
+  text-align: center;
+  color: #fcd34d;
+  font-weight: 700;
+}
+
+.options-chain.status {
+  padding: 20px;
+  border-radius: 12px;
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+.options-chain.status.error {
+  border: 1px solid #ef4444;
+  color: #fecaca;
+}

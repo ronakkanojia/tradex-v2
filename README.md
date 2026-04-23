@@ -23,4 +23,4 @@ Open http://localhost:3000
 3. Set `NEXT_PUBLIC_MARKET_DATA_FUNCTION_URL` in Project Settings → Environment Variables.
 4. Deploy.
 
-The app is built with Next.js App Router and is ready for Vercel deployment.
+The app is built with Next.js App Router and is ready for Vercel default settings.

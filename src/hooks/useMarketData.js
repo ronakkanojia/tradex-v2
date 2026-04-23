@@ -1,16 +1,16 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 const DEFAULT_SYMBOLS = ['^NSEI', '^INDIAVIX'];
 const DEFAULT_INTERVAL = '1m';
-const DEFAULT_REGION = 'us-central1';
-const DEFAULT_PROJECT_ID = 'tradex-59618';
 
-function getDefaultFunctionUrl() {
-  return `https://${DEFAULT_REGION}-${DEFAULT_PROJECT_ID}.cloudfunctions.net/getMarketData`;
+function parseJsonSafe(response) {
+  return response
+    .json()
+    .catch(() => ({}));
 }
 
 export function useMarketData({
-  functionUrl = process.env.NEXT_PUBLIC_MARKET_DATA_FUNCTION_URL || getDefaultFunctionUrl(),
+  functionUrl = process.env.NEXT_PUBLIC_MARKET_DATA_FUNCTION_URL,
   symbols = DEFAULT_SYMBOLS,
   interval = DEFAULT_INTERVAL,
   refreshMs = 15000,
@@ -18,14 +18,21 @@ export function useMarketData({
   const [data, setData] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [lastUpdated, setLastUpdated] = useState(null);
 
-  const symbolKey = useMemo(() => symbols.join(','), [symbols]);
+  const isMountedRef = useRef(true);
+
+  const stableSymbols = useMemo(
+    () => Array.from(new Set(symbols.map((symbol) => String(symbol).trim()).filter(Boolean))),
+    [symbols]
+  );
+  const symbolKey = useMemo(() => stableSymbols.join(','), [stableSymbols]);
 
   const fetchTicker = useCallback(
-    async (symbol) => {
+    async (symbol, signal) => {
       const qs = new URLSearchParams({ symbol, interval });
-      const response = await fetch(`${functionUrl}?${qs.toString()}`);
-      const payload = await response.json();
+      const response = await fetch(`${functionUrl}?${qs.toString()}`, { signal });
+      const payload = await parseJsonSafe(response);
 
       if (!response.ok) {
         const err = new Error(payload?.error || `Failed to fetch ${symbol}`);
@@ -40,24 +47,52 @@ export function useMarketData({
   );
 
   const refresh = useCallback(async () => {
+    if (!functionUrl) {
+      setError(new Error('Missing NEXT_PUBLIC_MARKET_DATA_FUNCTION_URL configuration'));
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
+    const controller = new AbortController();
+
     try {
-      const results = await Promise.all(symbols.map(fetchTicker));
+      const results = await Promise.all(stableSymbols.map((symbol) => fetchTicker(symbol, controller.signal)));
+      if (!isMountedRef.current) return;
       setData(Object.fromEntries(results));
+      setLastUpdated(new Date().toISOString());
     } catch (err) {
+      if (!isMountedRef.current || err?.name === 'AbortError') return;
       setError(err);
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
     }
-  }, [fetchTicker, symbols]);
+
+    return () => controller.abort();
+  }, [fetchTicker, functionUrl, stableSymbols]);
 
   useEffect(() => {
-    refresh();
+    isMountedRef.current = true;
+    let cancelCurrent;
 
-    const timer = setInterval(refresh, refreshMs);
-    return () => clearInterval(timer);
+    const run = async () => {
+      cancelCurrent = await refresh();
+    };
+
+    run();
+    const timer = setInterval(run, refreshMs);
+
+    return () => {
+      isMountedRef.current = false;
+      clearInterval(timer);
+      if (typeof cancelCurrent === 'function') {
+        cancelCurrent();
+      }
+    };
   }, [refresh, refreshMs, symbolKey]);
 
   return {
@@ -65,7 +100,7 @@ export function useMarketData({
     loading,
     error,
     refresh,
-    functionUrl,
+    lastUpdated,
   };
 }
 

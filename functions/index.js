@@ -16,8 +16,19 @@ function normalizeSymbol(raw) {
   return String(raw || '').trim().toUpperCase();
 }
 
+function applyJsonHeaders(res) {
+  res.set('Cache-Control', 'no-store');
+  res.set('Content-Type', 'application/json; charset=utf-8');
+}
+
 exports.getMarketData = onRequest({ region: 'us-central1' }, (req, res) => {
   cors(req, res, async () => {
+    applyJsonHeaders(res);
+
+    if (req.method === 'OPTIONS') {
+      return res.status(204).send('');
+    }
+
     if (req.method !== 'GET') {
       return res.status(405).json({
         error: 'Method not allowed. Use GET.',

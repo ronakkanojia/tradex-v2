@@ -34,7 +34,7 @@ export function OptionsChain({
   timeToExpiry = DEFAULT_TIME_TO_EXPIRY,
   refreshMs = 15000,
 }) {
-  const { data, loading, error } = useMarketData({ interval, refreshMs });
+  const { data, loading, error, lastUpdated } = useMarketData({ interval, refreshMs });
 
   const nifty = data['^NSEI'];
   const indiaVix = data['^INDIAVIX'];
@@ -77,6 +77,14 @@ export function OptionsChain({
     );
   }
 
+  if (!rows.length) {
+    return (
+      <div className="options-chain status">
+        Market data is available, but pricing inputs are incomplete. Waiting for next refresh.
+      </div>
+    );
+  }
+
   return (
     <section className="options-chain card">
       <header className="chain-header">
@@ -85,6 +93,7 @@ export function OptionsChain({
           <span>Spot: ₹{formatNumber(underlyingPrice)}</span>
           <span>IV (India VIX): {formatNumber(volatility * 100)}%</span>
           <span>RFR: {(RISK_FREE_RATE * 100).toFixed(2)}%</span>
+          <span>Updated: {lastUpdated ? new Date(lastUpdated).toLocaleTimeString('en-IN') : '--'}</span>
         </div>
       </header>
 

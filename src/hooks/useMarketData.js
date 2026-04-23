@@ -1,13 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 const DEFAULT_SYMBOLS = ['^NSEI', '^INDIAVIX'];
 const DEFAULT_INTERVAL = '1m';
-
-function parseJsonSafe(response) {
-  return response
-    .json()
-    .catch(() => ({}));
-}
 
 export function useMarketData({
   functionUrl = process.env.NEXT_PUBLIC_MARKET_DATA_FUNCTION_URL,
@@ -18,21 +12,14 @@ export function useMarketData({
   const [data, setData] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [lastUpdated, setLastUpdated] = useState(null);
 
-  const isMountedRef = useRef(true);
-
-  const stableSymbols = useMemo(
-    () => Array.from(new Set(symbols.map((symbol) => String(symbol).trim()).filter(Boolean))),
-    [symbols]
-  );
-  const symbolKey = useMemo(() => stableSymbols.join(','), [stableSymbols]);
+  const symbolKey = useMemo(() => symbols.join(','), [symbols]);
 
   const fetchTicker = useCallback(
-    async (symbol, signal) => {
+    async (symbol) => {
       const qs = new URLSearchParams({ symbol, interval });
-      const response = await fetch(`${functionUrl}?${qs.toString()}`, { signal });
-      const payload = await parseJsonSafe(response);
+      const response = await fetch(`${functionUrl}?${qs.toString()}`);
+      const payload = await response.json();
 
       if (!response.ok) {
         const err = new Error(payload?.error || `Failed to fetch ${symbol}`);
@@ -56,43 +43,21 @@ export function useMarketData({
     setLoading(true);
     setError(null);
 
-    const controller = new AbortController();
-
     try {
-      const results = await Promise.all(stableSymbols.map((symbol) => fetchTicker(symbol, controller.signal)));
-      if (!isMountedRef.current) return;
+      const results = await Promise.all(symbols.map(fetchTicker));
       setData(Object.fromEntries(results));
-      setLastUpdated(new Date().toISOString());
     } catch (err) {
-      if (!isMountedRef.current || err?.name === 'AbortError') return;
       setError(err);
     } finally {
-      if (isMountedRef.current) {
-        setLoading(false);
-      }
+      setLoading(false);
     }
-
-    return () => controller.abort();
-  }, [fetchTicker, functionUrl, stableSymbols]);
+  }, [fetchTicker, functionUrl, symbols]);
 
   useEffect(() => {
-    isMountedRef.current = true;
-    let cancelCurrent;
+    refresh();
 
-    const run = async () => {
-      cancelCurrent = await refresh();
-    };
-
-    run();
-    const timer = setInterval(run, refreshMs);
-
-    return () => {
-      isMountedRef.current = false;
-      clearInterval(timer);
-      if (typeof cancelCurrent === 'function') {
-        cancelCurrent();
-      }
-    };
+    const timer = setInterval(refresh, refreshMs);
+    return () => clearInterval(timer);
   }, [refresh, refreshMs, symbolKey]);
 
   return {
@@ -100,7 +65,6 @@ export function useMarketData({
     loading,
     error,
     refresh,
-    lastUpdated,
   };
 }
 

@@ -1,0 +1,132 @@
+:root {
+  color-scheme: dark;
+  --bg: #06090f;
+  --card: rgba(15, 23, 42, 0.75);
+  --stroke: rgba(148, 163, 184, 0.2);
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: radial-gradient(circle at 0% 0%, #0f172a 0%, var(--bg) 40%), var(--bg);
+  color: var(--text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  min-height: 100%;
+}
+
+.app-shell {
+  position: relative;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 40px 20px 80px;
+  display: grid;
+  gap: 24px;
+}
+
+.bg-orb {
+  position: fixed;
+  width: 280px;
+  height: 280px;
+  border-radius: 999px;
+  filter: blur(70px);
+  pointer-events: none;
+  opacity: 0.32;
+}
+
+.orb-1 {
+  top: -40px;
+  left: -40px;
+  background: #38bdf8;
+}
+
+.orb-2 {
+  right: -40px;
+  bottom: 20%;
+  background: #22d3ee;
+}
+
+.glass {
+  background: var(--card);
+  border: 1px solid var(--stroke);
+  backdrop-filter: blur(10px);
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(2, 6, 23, 0.45);
+}
+
+.hero {
+  padding: 28px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: #7dd3fc;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: clamp(1.6rem, 3vw, 2.6rem);
+}
+
+.subtitle {
+  margin: 12px 0 0;
+  color: var(--muted);
+  max-width: 900px;
+  line-height: 1.6;
+}
+
+.chips {
+  margin-top: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.chips span {
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  background: rgba(14, 116, 144, 0.16);
+  font-size: 0.8rem;
+  color: #bae6fd;
+}
+
+.panel {
+  padding: 16px;
+}
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  margin: 4px 8px 14px;
+}
+
+.panel-head h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.panel-head p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 768px) {
+  .panel-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

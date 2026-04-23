@@ -11,7 +11,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
   padding: 16px 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
@@ -24,8 +23,6 @@
 
 .chain-header .meta {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
   gap: 12px;
   font-size: 0.8rem;
   color: #cbd5e1;
@@ -46,7 +43,6 @@
   text-align: right;
   padding: 10px 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  white-space: nowrap;
 }
 
 .options-chain thead th {
@@ -57,7 +53,7 @@
 }
 
 .options-chain td.strike,
-.options-chain th:nth-child(7) {
+.options-chain th:nth-child(4) {
   text-align: center;
   color: #fcd34d;
   font-weight: 700;
@@ -73,15 +69,4 @@
 .options-chain.status.error {
   border: 1px solid #ef4444;
   color: #fecaca;
-}
-
-@media (max-width: 1024px) {
-  .chain-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .chain-header .meta {
-    justify-content: flex-start;
-  }
 }

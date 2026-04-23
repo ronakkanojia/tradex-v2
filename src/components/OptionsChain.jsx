@@ -22,11 +22,13 @@ function formatNumber(value, digits = 2) {
 function generateStrikes(underlying) {
   const step = 50;
   const atm = Math.round(underlying / step) * step;
+  const strikes = [];
 
-  return [
-    ...Array.from({ length: 5 }, (_, i) => atm - step * (5 - i)),
-    ...Array.from({ length: 5 }, (_, i) => atm + step * (i + 1)),
-  ];
+  for (let i = -5; i < 5; i += 1) {
+    strikes.push(atm + i * step);
+  }
+
+  return strikes;
 }
 
 export function OptionsChain({
@@ -34,7 +36,7 @@ export function OptionsChain({
   timeToExpiry = DEFAULT_TIME_TO_EXPIRY,
   refreshMs = 15000,
 }) {
-  const { data, loading, error, lastUpdated } = useMarketData({ interval, refreshMs });
+  const { data, loading, error } = useMarketData({ interval, refreshMs });
 
   const nifty = data['^NSEI'];
   const indiaVix = data['^INDIAVIX'];
@@ -77,14 +79,6 @@ export function OptionsChain({
     );
   }
 
-  if (!rows.length) {
-    return (
-      <div className="options-chain status">
-        Market data is available, but pricing inputs are incomplete. Waiting for next refresh.
-      </div>
-    );
-  }
-
   return (
     <section className="options-chain card">
       <header className="chain-header">
@@ -93,7 +87,6 @@ export function OptionsChain({
           <span>Spot: ₹{formatNumber(underlyingPrice)}</span>
           <span>IV (India VIX): {formatNumber(volatility * 100)}%</span>
           <span>RFR: {(RISK_FREE_RATE * 100).toFixed(2)}%</span>
-          <span>Updated: {lastUpdated ? new Date(lastUpdated).toLocaleTimeString('en-IN') : '--'}</span>
         </div>
       </header>
 
@@ -101,24 +94,18 @@ export function OptionsChain({
         <table>
           <thead>
             <tr>
-              <th colSpan={6}>CALL</th>
+              <th colSpan={3}>CALL</th>
               <th>STRIKE</th>
-              <th colSpan={6}>PUT</th>
+              <th colSpan={3}>PUT</th>
             </tr>
             <tr>
               <th>Price</th>
               <th>Delta</th>
-              <th>Gamma</th>
               <th>Theta</th>
-              <th>Vega</th>
-              <th>Rho</th>
               <th>₹</th>
               <th>Price</th>
               <th>Delta</th>
-              <th>Gamma</th>
               <th>Theta</th>
-              <th>Vega</th>
-              <th>Rho</th>
             </tr>
           </thead>
           <tbody>
@@ -126,17 +113,11 @@ export function OptionsChain({
               <tr key={row.strike}>
                 <td>{formatNumber(row.call.price)}</td>
                 <td>{formatNumber(row.call.delta, 3)}</td>
-                <td>{formatNumber(row.call.gamma, 4)}</td>
                 <td>{formatNumber(row.call.theta, 4)}</td>
-                <td>{formatNumber(row.call.vega, 4)}</td>
-                <td>{formatNumber(row.call.rho, 4)}</td>
                 <td className="strike">{formatNumber(row.strike, 0)}</td>
                 <td>{formatNumber(row.put.price)}</td>
                 <td>{formatNumber(row.put.delta, 3)}</td>
-                <td>{formatNumber(row.put.gamma, 4)}</td>
                 <td>{formatNumber(row.put.theta, 4)}</td>
-                <td>{formatNumber(row.put.vega, 4)}</td>
-                <td>{formatNumber(row.put.rho, 4)}</td>
               </tr>
             ))}
           </tbody>

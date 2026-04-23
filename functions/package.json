@@ -1,0 +1,19 @@
+{
+  "name": "tradex-market-data-functions",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "lint": "echo 'No lint configured'"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "firebase-functions": "^5.0.1",
+    "yahoo-finance2": "^2.13.3"
+  }
+}
